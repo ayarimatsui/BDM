@@ -3,7 +3,7 @@
 import smbus
 import time
 
-I2C_ADDR=0x1C
+I2C_ADDR=0x1D
 
 # Get I2C bus
 bus = smbus.SMBus(1)
