@@ -3,7 +3,7 @@
 import smbus
 import time
 
-I2C_ADDR=0x1D
+I2C_ADDR=0x1C
 
 # Get I2C bus
 bus = smbus.SMBus(1)
@@ -35,4 +35,5 @@ while True:
         zAccl -= 4096
 
     print("X,Y,Z-Axis : (%5d, %5d, %5d)" % (xAccl, yAccl, zAccl ))
+    print(xAccl)
     time.sleep(1)
