@@ -48,7 +48,7 @@ def pause_plot():
     # ここからCtrl+cまで無限にデータを取得し、リストに格納する
     try:
         while True:
-            時間の更新(ループは0.01秒で繰り返す)
+            #時間の更新(ループは0.01秒で繰り返す)
             t+=0.01
             #加速度センサのデータを代入
             data = bus.read_i2c_block_data(I2C_ADDR, 0x00, 7)
