@@ -35,5 +35,4 @@ while True:
         zAccl -= 4096
 
     print("X,Y,Z-Axis : (%5d, %5d, %5d)" % (xAccl, yAccl, zAccl ))
-    print(xAccl)
-    time.sleep(1)
+    time.sleep(0.1)

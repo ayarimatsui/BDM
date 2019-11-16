@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 matplotlibで加速度センサの値をリアルタイムプロットする
+ループの更新を１秒より短くすると、グラフの描画の速度が追いつかないです、、、
 
 """
 from __future__ import unicode_literals, print_function
@@ -16,7 +17,7 @@ def pause_plot():
     ax1 = plt.subplot(311)
     ax2 = plt.subplot(312)
     ax3 = plt.subplot(313)
-    x = [-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0] #はじめに表示されるｘ軸の範囲の設定
+    x = [-9,-8,-7,-6,-5,-4,-3,-2,-1,0] #はじめに表示されるｘ軸の範囲の設定
     y_x = [0,0,0,0,0,0,0,0,0,0] #加速度センサのx軸の値の初期値
     y_y = [0,0,0,0,0,0,0,0,0,0] #加速度センサのy軸の値の初期値
     y_z = [0,0,0,0,0,0,0,0,0,0] #加速度センサのz軸の値の初期値
@@ -25,7 +26,7 @@ def pause_plot():
     ax2.set_xlim(-1, 0)
     ax2.set_ylim(-1, 1)
     ax3.set_xlim(-1, 0)
-    ax2.set_ylim(-1, 1)
+    ax3.set_ylim(-1, 1)
     # 初期化的に一度plotしなければならない
     # そのときplotしたオブジェクトを受け取る受け取る必要がある．
     # listが返ってくるので，注意
@@ -73,7 +74,7 @@ def pause_plot():
             zAccl -= 4096
 
         #ｘ軸の更新
-        x = map(lambda p: p+0.1, x)
+        x = map(lambda p: p+1, x)
         
         #加速度センサｘ軸の値の更新
         y_x.pop(0)
@@ -104,12 +105,14 @@ def pause_plot():
         ax3.set_xlim(min(x), max(x))
         ax3.set_ylim(min(y_z)-10, max(y_z)+10)
         
+        #print("X,Y,Z-Axis : (%5d, %5d, %5d)" % (xAccl, yAccl, zAccl ))
+        
 
         # 一番のポイント
         # - plt.show() ブロッキングされてリアルタイムに描写できない
         # - plt.ion() + plt.draw() グラフウインドウが固まってプログラムが止まるから使えない
         # ----> plt.pause(interval) これを使う!!! 引数はsleep時間
-        time.sleep(0.1) #この値によって、何秒に１回センサの値を取得するかが変わる　今は10Hz
+        time.sleep(1) #この値によって、何秒に１回センサの値を取得するかが変わる　今は10Hz
         plt.pause(.01)
 
 if __name__ == "__main__":
