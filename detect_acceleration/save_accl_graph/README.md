@@ -7,8 +7,10 @@
 
 ＜手順＞
 python3で、save_accl_graph.pyを実行
+
 　↓
 十分にデータが取れたと思ったら、Ctrl+cを押して、データの取得を終了
+
 　↓
 コマンドラインに次のように、最大値、最小値などが出力される
 ![sample1](https://github.com/ayarimatsui/BDM/blob/master/detect_acceleration/save_accl_graph/sample_images/sample1.png)
