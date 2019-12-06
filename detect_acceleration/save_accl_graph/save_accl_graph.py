@@ -21,7 +21,7 @@ def pause_plot():
     y_w = [] #加速度の大きさ(y軸)を格納する空リストの作成
 
     
-    I2C_ADDR=0x1C #センサが入力されている場所の設定　場所は、i2cdetect -y 1 で確認
+    I2C_ADDR=0x1D #センサが入力されている場所の設定　場所は、i2cdetect -y 1 で確認
 
     # Get I2C bus
     bus = smbus.SMBus(1)
@@ -115,7 +115,7 @@ def pause_plot():
         ax4.set_ylim(0, max(y_w)+10)
         ax4.set_title("the magnitude of the acceleration")
         
-        fig.savefig("graphs/accl_graph.png") #必要に応じてファイル名は変える
+        fig.savefig("graphs/accl_graph1201.png") #必要に応じてファイル名は変える
         
         #処理が終わったこと、それぞれの最大値、最小値を表示
         print(" done!")
