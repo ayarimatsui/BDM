@@ -8,6 +8,13 @@ import time
 import math
 from neopixel import *
 import argparse
+import pygame.mixer
+from sound-maker.normal_walk import NormalWalk
+from sound-maker.slow_walk import SlowWalk
+from sound-maker.fast_walk import FastWalk
+from sound-maker.kick import Kick
+
+get_time=[]
 
 # LED strip configuration:
 LED_COUNT      = 30      # Number of LED pixels.
@@ -29,6 +36,26 @@ def gradationblueWipe(strip, wait_ms=20):
         #print(color)
         strip.show()
         time.sleep(wait_ms/1000.0)
+        
+def gradationredWipe(strip, wait_ms=10):
+    """Wipe color across display a pixel at a time."""
+    color=Color(0,255,0)
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, color+256*256*7*i)
+        strip.setPixelColor(i+strip.numPixels()/2, color+256*256*7*i)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
+        
+def gradationgreenWipe(strip, wait_ms=10):
+    """Wipe color across display a pixel at a time."""
+    color=Color(255,50,0)
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, color+256*15*i)
+        strip.setPixelColor(i+strip.numPixels()/2, color+256*15*i)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
 
 def disappearWipe(strip, wait_ms=20):
     """Wipe color across display a pixel at a time."""
@@ -38,6 +65,36 @@ def disappearWipe(strip, wait_ms=20):
         #print(color)
         strip.show()
         time.sleep(wait_ms/1000.0)
+        
+def wheel(pos):
+    """Generate rainbow colors across 0-255 positions."""
+    if pos < 85:
+        return Color(pos * 3, 255 - pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return Color(255 - pos * 3, 0, pos * 3)
+    else:
+        pos -= 170
+        return Color(0, pos * 3, 255 - pos * 3)
+  
+def rainbowCycle(strip, wait_ms=1, iterations=1):
+    """Draw rainbow that uniformly distributes itself across all pixels."""
+    for j in range(256*iterations):
+        for i in range(strip.numPixels()):
+            strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+        strip.show()
+        time.sleep(wait_ms/1000.0)  
+  
+def theaterChaseRainbow(strip, wait_ms=30):
+    """Rainbow movie theater light style chaser animation."""
+    for j in range(256):
+        for q in range(3):
+            for i in range(0, strip.numPixels(), 3):
+                strip.setPixelColor(i+q, wheel((i+j) % 255))
+            strip.show()
+            time.sleep(wait_ms/1000.0)
+            for i in range(0, strip.numPixels(), 3):
+                strip.setPixelColor(i+q, 0)
 
 
 I2C_ADDR=0x1C #センサが入力されている場所の設定　場所は、i2cdetect -y 1 で確認
@@ -57,10 +114,6 @@ bus.write_byte_data(I2C_ADDR, 0x2A, 0x01)
 #               0x00(00)        Set range to +/- 2g
 bus.write_byte_data(I2C_ADDR, 0x0E, 0x00)
 
-#音の初期設定をここで済ませておく
-pygame.mixer.init()
-pygame.mixer.music.load('sound-maker/sample_sound/Motion-Pop32-1.mp3')
-
 time.sleep(0.5)
 
 # Process arguments
@@ -72,6 +125,12 @@ args = parser.parse_args()
 strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 # Intialize the library (must be called once before other functions).
 strip.begin()
+
+# init sound
+normal_walk=NormalWalk()
+slow_walk=SlowWalk()
+fast_walk=FastWalk()
+kick=Kick()
 
 print("init")
 
@@ -87,12 +146,32 @@ while True:
         zAccl = (data[5] * 256 + data[6]) / 16
         if zAccl > 2047 :
             zAccl -= 4096
+            
+        w = math.sqrt(xAccl**2 + yAccl**2 + zAccl**2) #加速度の大きさ
         
         if xAccl<=-1500 and yAccl>=1500:
-            gradationblueWipe(strip)
-            pygame.mixer.music.play(1) # ()内は再生回数 -1:ループ再生
+            current_time=time.time()
+            get_time.append(current_time)
+            
+            if len(get_time)>=2:
+                print("time={}".format(get_time[-1]-get_time[-2]))
+                
+                if get_time[-1]-get_time[-2]>1.5: #slow walk
+                    gradationredWipe(strip)
+                    slow_walk.play()
+                    disappearWipe(strip)
+                elif get_time[-1]-get_time[-2]>0.7 and get_time[-1]-get_time[-2]<=1.5: #nomal walk
+                    gradationblueWipe(strip)
+                    normal_walk.play()
+                    disappearWipe(strip)
+                else: #fast walk
+                    gradationgreenWipe(strip)
+                    fast_walk.play()
+                    disappearWipe(strip)
+                    
+        elif xAccl<=-2000 and yAccl>=2000: #kick
+            rainbowCycle(strip)
+            kick.play()
             disappearWipe(strip)
-            time.sleep(0.5)
-            pygame.mixer.music.stop() # 再生の終了
             
         time.sleep(0.01)

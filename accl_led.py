@@ -8,6 +8,9 @@ import time
 import math
 from neopixel import *
 import argparse
+import time
+
+get_time=[]
 
 # LED strip configuration:
 LED_COUNT      = 30      # Number of LED pixels.
@@ -29,6 +32,26 @@ def gradationblueWipe(strip, wait_ms=20):
         #print(color)
         strip.show()
         time.sleep(wait_ms/1000.0)
+        
+def gradationredWipe(strip, wait_ms=10):
+    """Wipe color across display a pixel at a time."""
+    color=Color(0,255,0)
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, color+256*256*7*i)
+        strip.setPixelColor(i+strip.numPixels()/2, color+256*256*7*i)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
+        
+def gradationgreenWipe(strip, wait_ms=10):
+    """Wipe color across display a pixel at a time."""
+    color=Color(255,50,0)
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, color+256*15*i)
+        strip.setPixelColor(i+strip.numPixels()/2, color+256*15*i)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
 
 def disappearWipe(strip, wait_ms=20):
     """Wipe color across display a pixel at a time."""
@@ -38,6 +61,36 @@ def disappearWipe(strip, wait_ms=20):
         #print(color)
         strip.show()
         time.sleep(wait_ms/1000.0)
+        
+def wheel(pos):
+    """Generate rainbow colors across 0-255 positions."""
+    if pos < 85:
+        return Color(pos * 3, 255 - pos * 3, 0)
+    elif pos < 170:
+        pos -= 85
+        return Color(255 - pos * 3, 0, pos * 3)
+    else:
+        pos -= 170
+        return Color(0, pos * 3, 255 - pos * 3)
+  
+def rainbowCycle(strip, wait_ms=1, iterations=1):
+    """Draw rainbow that uniformly distributes itself across all pixels."""
+    for j in range(256*iterations):
+        for i in range(strip.numPixels()):
+            strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+        strip.show()
+        time.sleep(wait_ms/1000.0)  
+  
+def theaterChaseRainbow(strip, wait_ms=30):
+    """Rainbow movie theater light style chaser animation."""
+    for j in range(256):
+        for q in range(3):
+            for i in range(0, strip.numPixels(), 3):
+                strip.setPixelColor(i+q, wheel((i+j) % 255))
+            strip.show()
+            time.sleep(wait_ms/1000.0)
+            for i in range(0, strip.numPixels(), 3):
+                strip.setPixelColor(i+q, 0)
 
 
 I2C_ADDR=0x1C #センサが入力されている場所の設定　場所は、i2cdetect -y 1 で確認
@@ -83,9 +136,28 @@ while True:
         zAccl = (data[5] * 256 + data[6]) / 16
         if zAccl > 2047 :
             zAccl -= 4096
+            
+        w = math.sqrt(xAccl**2 + yAccl**2 + zAccl**2) #加速度の大きさ
         
         if xAccl<=-1500 and yAccl>=1500:
-            gradationblueWipe(strip)
+            current_time=time.time()
+            get_time.append(current_time)
+            
+            if len(get_time)>=2:
+                print("time={}".format(get_time[-1]-get_time[-2]))
+                
+                if get_time[-1]-get_time[-2]>1.5: #slow walk
+                    gradationredWipe(strip)
+                    disappearWipe(strip)
+                elif get_time[-1]-get_time[-2]>0.7 and get_time[-1]-get_time[-2]<=1.5: #nomal walk
+                    gradationblueWipe(strip)
+                    disappearWipe(strip)
+                else: #fast walk
+                    gradationgreenWipe(strip)
+                    disappearWipe(strip)
+                    
+        elif xAccl<=-2000 and yAccl>=2000: #kick
+            rainbowCycle(strip)
             disappearWipe(strip)
             
         time.sleep(0.01)
