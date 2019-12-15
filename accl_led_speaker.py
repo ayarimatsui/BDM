@@ -9,8 +9,10 @@ import math
 from neopixel import *
 import argparse
 import pygame
+import threading
 
-get_time=[]
+get_time1=[]
+get_time2=[]
 
 # LED strip configuration:
 LED_COUNT      = 30      # Number of LED pixels.
@@ -133,7 +135,48 @@ kick=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/byui-n.ogg')
 
 print("init")
 
-while True:
+def led_control():
+    
+    while True:
+            #加速度センサのデータを代入
+            data = bus.read_i2c_block_data(I2C_ADDR, 0x00, 7)
+            xAccl = (data[1] * 256 + data[2]) / 16
+            if xAccl > 2047 :
+                xAccl -= 4096
+            yAccl = (data[3] * 256 + data[4]) / 16
+            if yAccl > 2047 :
+                yAccl -= 4096
+            zAccl = (data[5] * 256 + data[6]) / 16
+            if zAccl > 2047 :
+                zAccl -= 4096
+                
+            w = math.sqrt(xAccl**2 + yAccl**2 + zAccl**2) #加速度の大きさ
+            
+            if xAccl<=-1500 and yAccl>=1500:
+                current_time=time.time()
+                get_time1.append(current_time)
+                
+                if len(get_time1)>=2:
+                    #print("time={}".format(get_time[-1]-get_time[-2]))
+                    if get_time1[-1]-get_time1[-2]>1.5: #slow walk
+                        gradationredWipe(strip)
+                        disappearWipe(strip)
+                    elif get_time1[-1]-get_time1[-2]>0.7 and get_time1[-1]-get_time1[-2]<=1.5: #nomal walk
+                        gradationblueWipe(strip)
+                        disappearWipe(strip)
+                    else: #fast walk
+                        gradationgreenWipe(strip)
+                        disappearWipe(strip)
+                        
+            '''elif w>=3300: #kick
+                rainbowCycle(strip)
+                disappearWipe(strip)'''
+                
+            time.sleep(0.01)
+            
+def sound_control():
+
+    while True:
         #加速度センサのデータを代入
         data = bus.read_i2c_block_data(I2C_ADDR, 0x00, 7)
         xAccl = (data[1] * 256 + data[2]) / 16
@@ -150,30 +193,27 @@ while True:
         
         if xAccl<=-1500 and yAccl>=1500:
             current_time=time.time()
-            get_time.append(current_time)
+            get_time2.append(current_time)
             
-            if len(get_time)>=2:
-                #print("time={}".format(get_time[-1]-get_time[-2]))
-                if get_time[-1]-get_time[-2]>1.5: #slow walk
-                    gradationredWipe(strip)
+            if len(get_time2)>=2:
+                if get_time2[-1]-get_time2[-2]>1.5: #slow walk
                     slow_walk.play()
                     time.sleep(0.3)
-                    disappearWipe(strip)
-                elif get_time[-1]-get_time[-2]>0.7 and get_time[-1]-get_time[-2]<=1.5: #nomal walk
-                    gradationblueWipe(strip)
+                elif get_time2[-1]-get_time2[-2]>0.7 and get_time2[-1]-get_time2[-2]<=1.5: #nomal walk
                     normal_walk.play()
                     time.sleep(0.3)
-                    disappearWipe(strip)
                 else: #fast walk
-                    gradationgreenWipe(strip)
                     fast_walk.play()
                     time.sleep(0.2)
-                    disappearWipe(strip)
                     
-        elif xAccl>=1400 and yAccl>=1400: #kick
-            rainbowCycle(strip)
+        '''elif w>=3300: #kick
             kick.play()
-            time.sleep(1.5)
-            disappearWipe(strip)
+            time.sleep(1.5)'''
             
         time.sleep(0.01)
+
+thread1=threading.Thread(target=led_control)
+thread2=threading.Thread(target=sound_control)
+
+thread1.start()
+thread2.start()
