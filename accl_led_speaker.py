@@ -8,11 +8,7 @@ import time
 import math
 from neopixel import *
 import argparse
-import pygame.mixer
-from sound-maker.normal_walk import NormalWalk
-from sound-maker.slow_walk import SlowWalk
-from sound-maker.fast_walk import FastWalk
-from sound-maker.kick import Kick
+import pygame
 
 get_time=[]
 
@@ -95,7 +91,7 @@ def theaterChaseRainbow(strip, wait_ms=30):
             time.sleep(wait_ms/1000.0)
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i+q, 0)
-
+                
 
 I2C_ADDR=0x1C #センサが入力されている場所の設定　場所は、i2cdetect -y 1 で確認
 
@@ -127,10 +123,13 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
 strip.begin()
 
 # init sound
-normal_walk=NormalWalk()
-slow_walk=SlowWalk()
-fast_walk=FastWalk()
-kick=Kick()
+pygame.init()
+
+normal_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/Motion-Pop32-1.ogg')
+slow_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/zun.ogg')
+fast_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/tetetete.ogg')
+kick=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/byui-n.ogg')
+
 
 print("init")
 
@@ -154,24 +153,27 @@ while True:
             get_time.append(current_time)
             
             if len(get_time)>=2:
-                print("time={}".format(get_time[-1]-get_time[-2]))
-                
+                #print("time={}".format(get_time[-1]-get_time[-2]))
                 if get_time[-1]-get_time[-2]>1.5: #slow walk
                     gradationredWipe(strip)
                     slow_walk.play()
+                    time.sleep(0.3)
                     disappearWipe(strip)
                 elif get_time[-1]-get_time[-2]>0.7 and get_time[-1]-get_time[-2]<=1.5: #nomal walk
                     gradationblueWipe(strip)
                     normal_walk.play()
+                    time.sleep(0.3)
                     disappearWipe(strip)
                 else: #fast walk
                     gradationgreenWipe(strip)
                     fast_walk.play()
+                    time.sleep(0.2)
                     disappearWipe(strip)
                     
-        elif xAccl<=-2000 and yAccl>=2000: #kick
+        elif xAccl>=1400 and yAccl>=1400: #kick
             rainbowCycle(strip)
             kick.play()
+            time.sleep(1.5)
             disappearWipe(strip)
             
         time.sleep(0.01)

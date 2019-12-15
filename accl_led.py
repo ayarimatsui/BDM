@@ -73,7 +73,7 @@ def wheel(pos):
         pos -= 170
         return Color(0, pos * 3, 255 - pos * 3)
   
-def rainbowCycle(strip, wait_ms=1, iterations=1):
+def rainbowCycle(strip, wait_ms=1, iterations=2):
     """Draw rainbow that uniformly distributes itself across all pixels."""
     for j in range(256*iterations):
         for i in range(strip.numPixels()):
@@ -156,7 +156,7 @@ while True:
                     gradationgreenWipe(strip)
                     disappearWipe(strip)
                     
-        elif xAccl<=-2000 and yAccl>=2000: #kick
+        elif xAccl>=1400 and yAccl>=1400: #kick
             rainbowCycle(strip)
             disappearWipe(strip)
             
