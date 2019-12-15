@@ -175,7 +175,7 @@ def led_control():
             time.sleep(0.01)
             
 def sound_control():
-
+    
     while True:
         #加速度センサのデータを代入
         data = bus.read_i2c_block_data(I2C_ADDR, 0x00, 7)
