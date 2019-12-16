@@ -64,6 +64,25 @@ def disappearWipe(strip, wait_ms=20):
         strip.show()
         time.sleep(wait_ms/1000.0)
         
+def canWipe(strip, wait_ms=3):
+    """Wipe color across display a pixel at a time."""
+    color=Color(255,255,0)
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, color+256*15*i)
+        strip.setPixelColor(i+strip.numPixels()/2, color+256*15*i)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
+        
+def canDisappear(strip, wait_ms=5):
+    """Wipe color across display a pixel at a time."""
+    for i in range(strip.numPixels()/2):
+        strip.setPixelColor(strip.numPixels()/2-i-1, 0)
+        strip.setPixelColor(i+strip.numPixels()/2, 0)
+        #print(color)
+        strip.show()
+        time.sleep(wait_ms/1000.0)
+
 def wheel(pos):
     """Generate rainbow colors across 0-255 positions."""
     if pos < 85:
@@ -131,7 +150,8 @@ normal_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/Motion-Pop
 slow_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/zun.ogg')
 fast_walk=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/tetetete.ogg')
 kick=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/byui-n.ogg')
-
+turn2=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/turn2.ogg')
+can=pygame.mixer.Sound('/home/pi/BDM/sound_maker/sample_sound/can.ogg')
 
 print("init")
 
@@ -167,7 +187,16 @@ def led_control():
                     else: #fast walk
                         gradationgreenWipe(strip)
                         disappearWipe(strip)
-                        
+            
+            elif xAccl<=-1200 and yAccl<=-1200 and zAccl>=1200:
+                rainbowCycle(strip)
+                disappearWipe(strip)
+                
+            '''elif xAccl<=-1200 and yAccl>=500 and yAccl<=1500 and zAccl>=-300 and zAccl>=300:
+                canWipe(strip)
+                canDisappear(strip)'''
+             
+            
             '''elif w>=3300: #kick
                 rainbowCycle(strip)
                 disappearWipe(strip)'''
@@ -206,6 +235,14 @@ def sound_control():
                     fast_walk.play()
                     time.sleep(0.2)
                     
+        elif xAccl<=-1200 and yAccl<=-1200 and zAccl>=1200:
+            turn2.play()
+            time.sleep(2)
+            
+        '''elif xAccl<=-500 and yAccl>=500 and yAccl<=800 and zAccl>=-300 and zAccl>=300:
+            can.play()
+            time.sleep(0.2)'''
+        
         '''elif w>=3300: #kick
             kick.play()
             time.sleep(1.5)'''
