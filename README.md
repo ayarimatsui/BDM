@@ -26,6 +26,9 @@ sudo python accl_led_speaker.py
 
 
 
+
+*****
+
 Created a pair of shoes, "DisShoes", which could change your walk into a fun activity.
 By analyzing the values gotten from the acceleration sensor, distinguishes the kinds of movement, (such as whether the person walks, walks slowly, fast, or turn). The colors of the LED lights and the sound from the speaker, both attached to the shoes, changes depend on the movements. I used RaspberryPi3 Model B to get the sensor values and to control the LED lights and the sound. Here, you can get access to the demo video.
 
