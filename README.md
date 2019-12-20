@@ -4,7 +4,7 @@
 
 ![DisShoes_image](https://github.com/ayarimatsui/BDM/blob/master/IMG_1942.JPG)
 
-歩くことが楽しくなるような靴を製作しました。
+歩くことが楽しくなるような靴"DisShoes"を製作しました。
 靴に取り付けた3軸加速度センサーの値をリアルタイムで取得し、その値から足の動きを判定し、動きの種類に応じて、靴に取り付けられたLEDテープの光り方や音が変わるようにしています。処理は、RaspberryPi3 Model Bで行なっています。実際に動いている様子は次の動画から見ることができます。
 
 https://www.youtube.com/watch?v=m2iPEg8bOUQ&feature=youtu.be
